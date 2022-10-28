@@ -53,12 +53,12 @@ def Q_learning(q_table, bins, episodes = 5000, gamma = 0.95, lr = 0.1, timestep 
     #iterating through n episodes
     for episode in range(1,episodes+1):
         
-        current_state = Discrete(env.reset(),bins) # initial observation
+        current_state = Discrete(env.reset()[0],bins) # initial observation
         score = 0
-        done = False
+        terminated = False
         temp_start = time.time()
         
-        while not done:
+        while not terminated:
             steps += 1 
             ep_start = time.time()
             if episode%timestep == 0:
@@ -72,7 +72,7 @@ def Q_learning(q_table, bins, episodes = 5000, gamma = 0.95, lr = 0.1, timestep 
                 #exploitation: finding the largest reward
                 action = np.argmax(q_table[current_state])
             
-            observation, reward, done, info = env.step(action)
+            observation, reward, terminated, truncated, info = env.step(action)
             
             next_state = Discrete(observation,bins)
             # print(observation,next_state)
@@ -81,7 +81,7 @@ def Q_learning(q_table, bins, episodes = 5000, gamma = 0.95, lr = 0.1, timestep 
             score += reward
             
             # Learning part, updating the q value
-            if not done:
+            if not terminated:
                 max_future_q = np.max(q_table[next_state])
                 current_q = q_table[current_state+(action,)]
                 new_q = (1-lr)*current_q + lr*(reward + gamma*max_future_q)
